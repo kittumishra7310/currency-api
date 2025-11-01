@@ -1,11 +1,32 @@
-import app from "./app.js";
+import express from "express";
+import cors from "cors";
 import dotenv from "dotenv";
-import { createTable } from "./db/db.js";
+import quotesRouter from "./routes/quotes.js";
+import averageRouter from "./routes/average.js";
+import slippageRouter from "./routes/slippage.js";
+
 dotenv.config();
+const app = express();
 
-const PORT = process.env.PORT || 3000;
+app.use(cors());
+app.use(express.json());
 
-(async () => {
-  await createTable();
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-})();
+app.use("/quotes", quotesRouter);
+app.use("/average", averageRouter);
+app.use("/slippage", slippageRouter);
+
+// ✅ Health route for testing
+app.get("/", (req, res) => {
+  res.send("Currency API is running 🚀");
+});
+
+// ✅ For local testing
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running locally on port ${PORT}`);
+  });
+}
+
+// ✅ For Vercel (serverless export)
+export default app;
